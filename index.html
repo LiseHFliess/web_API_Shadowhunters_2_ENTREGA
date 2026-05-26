@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shadowhunters API</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --orange:   #e8721a;
+      --orange-l: #f59d45;
+      --orange-d: #b34f08;
+      --purple:   #6b35a8;
+      --purple-l: #9b62d8;
+      --purple-d: #3d1a6e;
+      --blue:     #4a90c4;
+      --blue-l:   #7eb8e8;
+      --blue-d:   #1e5a85;
+      --bg:       #0a0612;
+      --bg2:      #100920;
+      --bg3:      #180d2e;
+      --surface:  rgba(255,255,255,0.04);
+      --border:   rgba(107,53,168,0.35);
+      --text:     #e8ddf8;
+      --text-dim: #9985c0;
+      --rune-glow: 0 0 20px rgba(232,114,26,0.5), 0 0 40px rgba(107,53,168,0.3);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Raleway', sans-serif;
+      font-weight: 400;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── Background rune pattern ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(107,53,168,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 90%, rgba(74,144,196,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(232,114,26,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── Floating rune symbols ── */
+    .rune-bg {
+      position: fixed; inset: 0; z-index: 0;
+      overflow: hidden; pointer-events: none;
+    }
+    .rune-bg span {
+      position: absolute;
+      font-family: 'Cinzel', serif;
+      color: rgba(107,53,168,0.06);
+      font-size: clamp(60px, 8vw, 120px);
+      animation: floatRune 20s ease-in-out infinite;
+      user-select: none;
+    }
+    .rune-bg span:nth-child(1)  { top: 5%;  left: 3%;  animation-delay: 0s;    font-size: 90px; }
+    .rune-bg span:nth-child(2)  { top: 20%; right: 5%; animation-delay: -5s;   font-size: 70px; }
+    .rune-bg span:nth-child(3)  { top: 55%; left: 8%;  animation-delay: -10s;  font-size: 110px; }
+    .rune-bg span:nth-child(4)  { top: 75%; right: 10%;animation-delay: -3s;   font-size: 85px; }
+    .rune-bg span:nth-child(5)  { top: 40%; left: 45%; animation-delay: -15s;  font-size: 65px; color: rgba(232,114,26,0.05); }
+    @keyframes floatRune {
+      0%,100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0.5; }
+      33%      { transform: translateY(-25px) rotate(3deg) scale(1.02); opacity: 0.8; }
+      66%      { transform: translateY(12px) rotate(-2deg) scale(0.98); opacity: 0.4; }
+    }
+
+    /* ── Layout ── */
+    .wrapper { position: relative; z-index: 1; }
+
+    /* ── HEADER ── */
+    header {
+      text-align: center;
+      padding: 80px 24px 60px;
+      position: relative;
+    }
+    header::after {
+      content: '';
+      display: block;
+      width: 60%; max-width: 600px;
+      height: 1px;
+      margin: 48px auto 0;
+      background: linear-gradient(90deg, transparent, var(--orange), var(--purple), var(--blue), transparent);
+    }
+
+    .angelic-symbol {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: inline-block;
+      animation: pulseGlow 3s ease-in-out infinite;
+      filter: drop-shadow(var(--rune-glow));
+    }
+    @keyframes pulseGlow {
+      0%,100% { filter: drop-shadow(0 0 8px rgba(232,114,26,0.6)); transform: scale(1); }
+      50%      { filter: drop-shadow(0 0 24px rgba(232,114,26,0.9)) drop-shadow(0 0 40px rgba(107,53,168,0.5)); transform: scale(1.05); }
+    }
+
+    h1 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(28px, 5vw, 56px);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--orange-l) 0%, var(--orange) 30%, var(--purple-l) 65%, var(--blue-l) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(11px, 1.5vw, 14px);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 24px;
+    }
+    .tagline {
+      font-size: 15px;
+      color: var(--text-dim);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── CONFIG BAND ── */
+    .config-band {
+      background: var(--bg3);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 24px;
+    }
+    .config-inner {
+      max-width: 900px; margin: 0 auto;
+      display: flex; flex-wrap: wrap; gap: 16px;
+      align-items: flex-end;
+    }
+    .config-inner label {
+      font-family: 'Cinzel', serif;
+      font-size: 10px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--orange);
+      display: block; margin-bottom: 6px;
+    }
+    .config-inner input {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'Raleway', sans-serif;
+      font-size: 13px;
+      width: 100%; min-width: 200px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .config-inner input:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 2px rgba(232,114,26,0.15);
+    }
+    .config-group { flex: 1 1 220px; }
+    .config-group.wide { flex: 2 1 340px; }
+    .btn-apply {
+      background: linear-gradient(135deg, var(--orange-d), var(--orange));
+      border: none; border-radius: 4px;
+      padding: 10px 28px;
+      font-family: 'Cinzel', serif;
+      font-size: 11px; letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #fff; cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      align-self: flex-end;
+    }
+    .btn-apply:hover { background: linear-gradient(135deg, var(--orange), var(--orange-l)); box-shadow: 0 0 16px rgba(232,114,26,0.4); }
+
+    /* ── MAIN ── */
+    main { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    /* ── STATUS BAR ── */
+    #status-bar {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 20px;
+      margin-bottom: 40px;
+      font-size: 13px;
+    }
+    .status-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #666; flex-shrink: 0;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .status-dot.online  { background: #4ade80; box-shadow: 0 0 8px #4ade80; }
+    .status-dot.offline { background: #f87171; box-shadow: 0 0 8px #f87171; }
+    .status-dot.loading { background: var(--orange); animation: blink 1s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    #status-text { color: var(--text-dim); }
+    .link-swagger {
+      margin-left: auto;
+      font-family: 'Cinzel', serif;
+      font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--blue-l);
+      text-decoration: none;
+      border: 1px solid rgba(74,144,196,0.3);
+      padding: 4px 12px; border-radius: 3px;
+      transition: all 0.2s;
+    }
+    .link-swagger:hover { background: rgba(74,144,196,0.1); border-color: var(--blue-l); }
+
+    /* ── SECTION TITLES ── */
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-title::before, .section-title::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border));
+    }
+    .section-title::before { background: linear-gradient(90deg, var(--border), transparent); }
+
+    /* ── ENTITIES GRID ── */
+    .entities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .entity-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .entity-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(107,53,168,0.25);
+      border-color: var(--purple-l);
+    }
+    .entity-card.active {
+      border-color: var(--orange);
+      box-shadow: 0 0 24px rgba(232,114,26,0.2);
+    }
+    .card-header {
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .card-icon {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .card-name {
+      font-family: 'Cinzel', serif;
+      font-size: 13px; font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+    .card-route {
+      font-size: 10px; color: var(--text-dim); letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+    .card-body { padding: 12px 20px 16px; }
+    .card-desc { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+
+    .method-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .pill {
+      font-size: 9px; font-family: 'Cinzel', serif;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 2px;
+      border: 1px solid; font-weight: 600;
+    }
+    .pill-get    { color: #6ee7b7; border-color: rgba(110,231,183,0.3); background: rgba(110,231,183,0.07); }
+    .pill-post   { color: var(--orange-l); border-color: rgba(232,114,26,0.3); background: rgba(232,114,26,0.07); }
+    .pill-put    { color: var(--blue-l); border-color: rgba(74,144,196,0.3); background: rgba(74,144,196,0.07); }
+    .pill-delete { color: #f87171; border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.07); }
+    .pill-patch  { color: var(--purple-l); border-color: rgba(155,98,216,0.3); background: rgba(155,98,216,0.07); }
+
+    /* ── ENDPOINT TESTER ── */
+    #tester {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 48px;
+    }
+    .tester-header {
+      background: var(--bg3);
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap; gap: 10px;
+    }
+    .method-select {
+      background: rgba(0,0,0,0.6);
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 8px 12px;
+      font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.1em;
+      color: var(--orange-l); cursor: pointer; outline: none;
+    }
+    #endpoint-input {
+      flex: 1; min-width: 200px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 8px 14px;
+      font-family: 'Raleway', sans-serif; font-size: 13px;
+      color: var(--text); outline: none;
+      transition: border-color 0.2s;
+    }
+    #endpoint-input:focus { border-color: var(--orange); }
+    .btn-send {
+      background: linear-gradient(135deg, var(--purple-d), var(--purple));
+      border: none; border-radius: 4px;
+      padding: 9px 24px;
+      font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.15em;
+      text-transform: uppercase; color: #fff; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-send:hover { background: linear-gradient(135deg, var(--purple), var(--purple-l)); }
+    .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .tester-body { padding: 20px; }
+    .tester-row { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .tester-row .field-group { flex: 1 1 180px; }
+    .field-group label {
+      font-family: 'Cinzel', serif; font-size: 9px;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--text-dim); display: block; margin-bottom: 5px;
+    }
+    .field-group input, .field-group textarea {
+      width: 100%;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 4px;
+      padding: 8px 12px;
+      font-family: 'Raleway', sans-serif; font-size: 12px;
+      color: var(--text); outline: none; resize: vertical;
+      transition: border-color 0.2s;
+    }
+    .field-group input:focus, .field-group textarea:focus { border-color: var(--purple-l); }
+    #body-input { min-height: 100px; font-family: 'Courier New', monospace; font-size: 12px; }
+
+    /* ── RESPONSE BOX ── */
+    #response-box {
+      display: none;
+      border-top: 1px solid var(--border);
+      padding: 20px;
+    }
+    #response-box.visible { display: block; }
+    .resp-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+    }
+    .resp-status {
+      font-family: 'Cinzel', serif; font-size: 11px;
+      font-weight: 700; letter-spacing: 0.08em;
+      padding: 3px 10px; border-radius: 3px;
+    }
+    .resp-status.ok    { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+    .resp-status.err   { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+    .resp-status.warn  { background: rgba(232,114,26,0.15);  color: var(--orange-l); border: 1px solid rgba(232,114,26,0.3); }
+    .resp-time { font-size: 11px; color: var(--text-dim); }
+    pre#response-data {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 4px; padding: 16px;
+      font-size: 12px; color: #c9d6df;
+      overflow-x: auto; max-height: 360px; overflow-y: auto;
+      font-family: 'Courier New', monospace; line-height: 1.5;
+      white-space: pre-wrap; word-break: break-word;
+    }
+
+    /* ── QUICK ROUTES ── */
+    .quick-routes { margin-bottom: 48px; }
+    .route-list { display: flex; flex-direction: column; gap: 8px; }
+    .route-item {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 6px; padding: 10px 16px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .route-item:hover { border-color: var(--border); background: rgba(107,53,168,0.08); }
+    .route-method {
+      font-family: 'Cinzel', serif; font-size: 10px;
+      font-weight: 700; letter-spacing: 0.1em;
+      width: 52px; text-align: center;
+      flex-shrink: 0;
+    }
+    .route-path { font-family: 'Courier New', monospace; font-size: 12px; color: var(--text-dim); flex: 1; }
+    .route-desc { font-size: 11px; color: rgba(255,255,255,0.3); }
+
+    /* ── INFO CARDS ── */
+    .info-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px; margin-bottom: 48px;
+    }
+    .info-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      padding: 20px 18px; text-align: center;
+    }
+    .info-card .value {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 28px; font-weight: 700;
+      background: linear-gradient(135deg, var(--orange), var(--purple-l));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .info-card .label {
+      font-family: 'Cinzel', serif; font-size: 9px;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-dim); margin-top: 6px;
+    }
+
+    /* ── DEPLOY GUIDE ── */
+    .deploy-section { margin-bottom: 48px; }
+    .step-list { display: flex; flex-direction: column; gap: 12px; }
+    .step {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: var(--surface); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 6px; padding: 14px 16px;
+    }
+    .step-num {
+      font-family: 'Cinzel Decorative', serif; font-size: 18px; font-weight: 700;
+      color: var(--orange); width: 28px; flex-shrink: 0; line-height: 1;
+    }
+    .step-content { font-size: 13px; line-height: 1.6; color: var(--text-dim); }
+    .step-content strong { color: var(--text); }
+    code {
+      background: rgba(232,114,26,0.1); border: 1px solid rgba(232,114,26,0.2);
+      border-radius: 3px; padding: 1px 6px;
+      font-family: 'Courier New', monospace; font-size: 11px; color: var(--orange-l);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center; padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--text-dim);
+      font-family: 'Cinzel', serif; letter-spacing: 0.12em;
+    }
+    footer span { color: var(--orange); }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: var(--purple-d); border-radius: 3px; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 32px; right: 32px; z-index: 999;
+      background: var(--bg3); border: 1px solid var(--orange);
+      border-radius: 6px; padding: 12px 20px;
+      font-size: 12px; color: var(--orange-l);
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s; pointer-events: none;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div class="rune-bg">
+  <span>᛫</span><span>ᚱ</span><span>ᛟ</span><span>ᚹ</span><span>ᚾ</span>
+</div>
+
+<div class="wrapper">
+
+  <!-- ══ HEADER ══ -->
+  <header>
+    <div class="angelic-symbol">⚔️</div>
+    <h1>Shadowhunters API</h1>
+    <p class="subtitle">Arquivos do Conselho Clave · REST · HATEOAS · Spring Boot</p>
+    <p class="tagline">Portal de acesso à base de dados do mundo das sombras. Personagens, armas, runas, missões e institutos.</p>
+  </header>
+
+  <!-- ══ CONFIG BAND ══ -->
+  <div class="config-band">
+    <div class="config-inner">
+      <div class="config-group wide">
+        <label>URL Base da API (Render)</label>
+        <input type="text" id="base-url" placeholder="https://sua-api.onrender.com" value="https://sua-api.onrender.com" />
+      </div>
+      <div class="config-group">
+        <label>X-API-Key</label>
+        <input type="text" id="api-key-input" placeholder="sua-chave-api" />
+      </div>
+      <button class="btn-apply" onclick="applyConfig()">Conectar</button>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- ══ STATUS ══ -->
+    <div id="status-bar">
+      <div class="status-dot" id="dot"></div>
+      <span id="status-text">Configure a URL acima e clique em Conectar</span>
+      <a id="swagger-link" class="link-swagger" href="#" target="_blank">Swagger UI ↗</a>
+    </div>
+
+    <!-- ══ STATS ══ -->
+    <div class="info-grid">
+      <div class="info-card"><div class="value">5</div><div class="label">Entidades</div></div>
+      <div class="info-card"><div class="value">30+</div><div class="label">Endpoints</div></div>
+      <div class="info-card"><div class="value">H2</div><div class="label">Banco em Memória</div></div>
+      <div class="info-card"><div class="value">HAL</div><div class="label">HATEOAS + JSON</div></div>
+    </div>
+
+    <!-- ══ ENTIDADES ══ -->
+    <div class="section-title">Entidades</div>
+    <div class="entities-grid" id="entities-grid"></div>
+
+    <!-- ══ TESTER ══ -->
+    <div class="section-title">Testar Endpoint</div>
+    <div id="tester">
+      <div class="tester-header">
+        <select class="method-select" id="method-select">
+          <option>GET</option>
+          <option>POST</option>
+          <option>PUT</option>
+          <option>DELETE</option>
+          <option>PATCH</option>
+        </select>
+        <input type="text" id="endpoint-input" placeholder="/personagens?page=0&size=10" value="/personagens?page=0&size=10"/>
+        <button class="btn-send" id="send-btn" onclick="sendRequest()">Enviar</button>
+      </div>
+      <div class="tester-body">
+        <div class="tester-row">
+          <div class="field-group">
+            <label>X-Idempotency-Key (POST)</label>
+            <input type="text" id="idempotency-key" placeholder="chave-unica-001"/>
+          </div>
+          <div class="field-group">
+            <label>Parâmetros extras de query</label>
+            <input type="text" id="extra-params" placeholder="page=0&size=5"/>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Body (JSON — para POST/PUT)</label>
+          <textarea id="body-input" placeholder='{"nome": "Clary Fray", "especie": "SHADOWHUNTER", "estaVivo": true}'></textarea>
+        </div>
+      </div>
+      <div id="response-box">
+        <div class="resp-header">
+          <span class="resp-status" id="resp-status">—</span>
+          <span class="resp-time" id="resp-time"></span>
+        </div>
+        <pre id="response-data"></pre>
+      </div>
+    </div>
+
+    <!-- ══ ROTAS RÁPIDAS ══ -->
+    <div class="section-title">Rotas Rápidas</div>
+    <div class="quick-routes">
+      <div class="route-list" id="routes-list"></div>
+    </div>
+
+    <!-- ══ DEPLOY GUIDE ══ -->
+    <div class="section-title">Como Integrar — Render + GitHub Pages</div>
+    <div class="deploy-section">
+      <div class="step-list">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <strong>Deploy no Render:</strong> Acesse <code>render.com</code>, crie um novo <em>Web Service</em>, conecte ao repositório Git com o projeto Spring Boot e configure como: <code>./mvnw package -DskipTests</code> para build e <code>java -jar target/*.jar</code> para start. Use a porta <code>8080</code>.
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <strong>Configure a URL:</strong> Após o deploy, copie a URL gerada pelo Render (ex: <code>https://shadowhunters-api.onrender.com</code>) e cole no campo "URL Base da API" acima. Clique em <strong>Conectar</strong>.
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <strong>GitHub Pages:</strong> Coloque este arquivo <code>index.html</code> na raiz do seu repositório (ou na pasta <code>/docs</code>). No GitHub, vá em <em>Settings → Pages</em> e habilite o Pages apontando para a branch e pasta corretas.
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <strong>CORS:</strong> Certifique-se que a sua <code>CorsConfig.java</code> permite requisições de <code>https://seu-usuario.github.io</code>. Adicione a origem do seu GitHub Pages na lista de origens permitidas.
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <strong>Swagger:</strong> Acesse <code>/swagger-ui.html</code> na URL do Render para documentação interativa completa. O link <strong>Swagger UI ↗</strong> no topo desta página abre automaticamente após configurar a URL.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    ⚔️ &nbsp;<span>Shadowhunters API</span>&nbsp; · &nbsp;Spring Boot · HATEOAS · Swagger/OpenAPI &nbsp;·&nbsp; Senac
+  </footer>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  // ── Config ──
+  let BASE_URL = 'https://sua-api.onrender.com';
+  let API_KEY  = '';
+
+  function applyConfig() {
+    BASE_URL = document.getElementById('base-url').value.replace(/\/$/, '');
+    API_KEY  = document.getElementById('api-key-input').value.trim();
+    document.getElementById('swagger-link').href = BASE_URL + '/swagger-ui.html';
+    pingAPI();
+    toast('Configuração aplicada!');
+  }
+
+  async function pingAPI() {
+    const dot  = document.getElementById('dot');
+    const text = document.getElementById('status-text');
+    dot.className = 'status-dot loading';
+    text.textContent = 'Verificando conexão…';
+    try {
+      const r = await fetch(BASE_URL + '/personagens?page=0&size=1', {
+        headers: buildHeaders('GET')
+      });
+      if (r.ok || r.status === 401 || r.status === 403) {
+        dot.className = 'status-dot online';
+        text.textContent = 'API online · ' + BASE_URL;
+      } else {
+        dot.className = 'status-dot offline';
+        text.textContent = 'Resposta inesperada: HTTP ' + r.status;
+      }
+    } catch (e) {
+      dot.className = 'status-dot offline';
+      text.textContent = 'Sem resposta. Verifique a URL ou aguarde o Render acordar.';
+    }
+  }
+
+  function buildHeaders(method) {
+    const h = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    if (API_KEY) h['X-API-Key'] = API_KEY;
+    const ik = document.getElementById('idempotency-key').value.trim();
+    if (method === 'POST' && ik) h['X-Idempotency-Key'] = ik;
+    return h;
+  }
+
+  async function sendRequest() {
+    const method   = document.getElementById('method-select').value;
+    const endpoint = document.getElementById('endpoint-input').value;
+    const bodyRaw  = document.getElementById('body-input').value.trim();
+    const btn      = document.getElementById('send-btn');
+
+    btn.disabled = true; btn.textContent = '…';
+    const t0 = performance.now();
+
+    const opts = { method, headers: buildHeaders(method) };
+    if (['POST','PUT','PATCH'].includes(method) && bodyRaw) {
+      opts.body = bodyRaw;
+    }
+
+    const box     = document.getElementById('response-box');
+    const pre     = document.getElementById('response-data');
+    const stEl    = document.getElementById('resp-status');
+    const timeEl  = document.getElementById('resp-time');
+    box.classList.remove('visible');
+
+    try {
+      const r    = await fetch(BASE_URL + endpoint, opts);
+      const ms   = Math.round(performance.now() - t0);
+      let body;
+      const ct = r.headers.get('content-type') || '';
+      if (ct.includes('json')) body = await r.json().catch(() => r.text());
+      else                      body = await r.text();
+
+      stEl.textContent = r.status + ' ' + r.statusText;
+      stEl.className   = 'resp-status ' + (r.ok ? 'ok' : r.status < 500 ? 'warn' : 'err');
+      timeEl.textContent = ms + ' ms';
+      pre.textContent    = typeof body === 'object' ? JSON.stringify(body, null, 2) : body;
+    } catch (e) {
+      stEl.textContent  = 'Erro de rede';
+      stEl.className    = 'resp-status err';
+      timeEl.textContent = '';
+      pre.textContent   = e.message;
+    }
+
+    box.classList.add('visible');
+    btn.disabled = false; btn.textContent = 'Enviar';
+  }
+
+  function fillTester(method, path, body) {
+    document.getElementById('method-select').value  = method;
+    document.getElementById('endpoint-input').value = path;
+    if (body) document.getElementById('body-input').value = body;
+    document.getElementById('tester').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── Entities ──
+  const ENTITIES = [
+    {
+      name: 'Personagem', route: '/personagens', icon: '🗡️',
+      color: 'linear-gradient(135deg,#e8721a,#b34f08)',
+      desc: 'Caçadores, vampiros, lobisomens e mais. Campos: nome, espécie (enum), estaVivo.',
+      methods: ['GET','POST','PUT','DELETE'],
+      postBody: '{\n  "nome": "Clary Fray",\n  "especie": "SHADOWHUNTER",\n  "estaVivo": true\n}'
+    },
+    {
+      name: 'Arma', route: '/armas', icon: '⚔️',
+      color: 'linear-gradient(135deg,#6b35a8,#3d1a6e)',
+      desc: 'Lâminas Serafim, arcos e mais. Campos: nome, tipoMaterial, dono (personagem).',
+      methods: ['GET','POST','PUT','DELETE'],
+      postBody: '{\n  "nome": "Lâmina Serafim",\n  "tipoMaterial": "Adamas"\n}'
+    },
+    {
+      name: 'Runa', route: '/runas', icon: '✦',
+      color: 'linear-gradient(135deg,#4a90c4,#1e5a85)',
+      desc: 'Marcas angelicais. Campos: nome, efeito, nivelDeDor (1–10).',
+      methods: ['GET','POST','PUT','DELETE'],
+      postBody: '{\n  "nome": "Visão",\n  "efeito": "Permite ver através de glamours",\n  "nivelDeDor": 3\n}'
+    },
+    {
+      name: 'Missão', route: '/missoes', icon: '📜',
+      color: 'linear-gradient(135deg,#c75f1a,#6b35a8)',
+      desc: 'Caçadas e patrulhas. Campos: descricao, periculosidade (enum), localizacao.',
+      methods: ['GET','POST','PUT','DELETE'],
+      postBody: '{\n  "descricao": "Caçar demônio Shax no Brooklyn",\n  "periculosidade": "ALTA",\n  "localizacao": "Hotel Dumort"\n}'
+    },
+    {
+      name: 'Instituto', route: '/institutos', icon: '🏛️',
+      color: 'linear-gradient(135deg,#2a7a4a,#1a5530)',
+      desc: 'Sedes dos Caçadores. Campos: nomeCidade, chefeDoInstituto.',
+      methods: ['GET','POST','PUT','DELETE'],
+      postBody: '{\n  "nomeCidade": "Nova York",\n  "chefeDoInstituto": "Maryse Lightwood"\n}'
+    },
+    {
+      name: 'API Key', route: '/apikeys', icon: '🔑',
+      color: 'linear-gradient(135deg,#7a6a1a,#4a3f08)',
+      desc: 'Gerenciamento de chaves de autenticação. Requer X-API-Key válida.',
+      methods: ['GET','POST','DELETE'],
+      postBody: '{\n  "descricao": "Chave de acesso para uso externo"\n}'
+    },
+  ];
+
+  const grid = document.getElementById('entities-grid');
+  ENTITIES.forEach(e => {
+    const el = document.createElement('div');
+    el.className = 'entity-card';
+    el.innerHTML = `
+      <div class="card-header">
+        <div class="card-icon" style="background:${e.color}">${e.icon}</div>
+        <div>
+          <div class="card-name">${e.name}</div>
+          <div class="card-route">${e.route}</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-desc">${e.desc}</div>
+        <div class="method-pills">
+          ${e.methods.map(m => `<span class="pill pill-${m.toLowerCase()}">${m}</span>`).join('')}
+        </div>
+      </div>
+    `;
+    el.onclick = () => {
+      document.querySelectorAll('.entity-card').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      fillTester('GET', e.route + '?page=0&size=10', '');
+    };
+    grid.appendChild(el);
+  });
+
+  // ── Quick routes ──
+  const ROUTES = [
+    { method:'GET',    path:'/personagens?page=0&size=10',             desc:'Listar personagens paginado',        color:'#6ee7b7' },
+    { method:'GET',    path:'/personagens/1',                          desc:'Buscar personagem por ID',           color:'#6ee7b7' },
+    { method:'GET',    path:'/personagens/buscar?nome=Clary',          desc:'Buscar personagem por nome',         color:'#6ee7b7' },
+    { method:'POST',   path:'/personagens',                            desc:'Criar personagem (requer Idempotency-Key)', color:'#f59d45', body:'{\n  "nome": "Jace Herondale",\n  "especie": "SHADOWHUNTER",\n  "estaVivo": true\n}' },
+    { method:'GET',    path:'/armas?page=0&size=10',                   desc:'Listar armas',                       color:'#6ee7b7' },
+    { method:'POST',   path:'/armas',                                  desc:'Criar arma',                         color:'#f59d45', body:'{\n  "nome": "Lâmina Serafim",\n  "tipoMaterial": "Adamas"\n}' },
+    { method:'GET',    path:'/runas?page=0&size=10',                   desc:'Listar runas',                       color:'#6ee7b7' },
+    { method:'POST',   path:'/runas',                                  desc:'Criar runa',                         color:'#f59d45', body:'{\n  "nome": "Iratze",\n  "efeito": "Cura ferimentos físicos",\n  "nivelDeDor": 2\n}' },
+    { method:'GET',    path:'/missoes?page=0&size=10',                 desc:'Listar missões',                     color:'#6ee7b7' },
+    { method:'GET',    path:'/missoes/buscar?periculosidade=ALTA',     desc:'Missões por periculosidade',         color:'#6ee7b7' },
+    { method:'GET',    path:'/institutos?page=0&size=10',              desc:'Listar institutos',                  color:'#6ee7b7' },
+    { method:'GET',    path:'/institutos/buscar?cidade=Nova',          desc:'Buscar instituto por cidade',        color:'#6ee7b7' },
+    { method:'DELETE', path:'/personagens/1',                          desc:'Deletar personagem',                 color:'#f87171' },
+    { method:'PUT',    path:'/personagens/1',                          desc:'Atualizar personagem',               color:'#7eb8e8', body:'{\n  "nome": "Jace Wayland",\n  "especie": "SHADOWHUNTER",\n  "estaVivo": true\n}' },
+  ];
+
+  const list = document.getElementById('routes-list');
+  ROUTES.forEach(r => {
+    const el = document.createElement('div');
+    el.className = 'route-item';
+    el.innerHTML = `
+      <span class="route-method pill pill-${r.method.toLowerCase()}">${r.method}</span>
+      <span class="route-path">${r.path}</span>
+      <span class="route-desc">${r.desc}</span>
+    `;
+    el.onclick = () => fillTester(r.method, r.path, r.body || '');
+    list.appendChild(el);
+  });
+
+  // ── Toast ──
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
+</body>
+</html>
