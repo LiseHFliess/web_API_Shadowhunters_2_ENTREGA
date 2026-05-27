@@ -698,10 +698,11 @@
     btn.disabled = false; btn.textContent = 'Enviar';
   }
 
+  // ✅ FIX: sempre atualiza o body-input, inclusive quando vazio
   function fillTester(method, path, body) {
     document.getElementById('method-select').value  = method;
     document.getElementById('endpoint-input').value = path;
-    if (body) document.getElementById('body-input').value = body;
+    document.getElementById('body-input').value = body !== undefined ? body : '';
     document.getElementById('tester').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -770,10 +771,11 @@
         </div>
       </div>
     `;
+    // ✅ FIX: passa e.postBody para o tester ao clicar no card
     el.onclick = () => {
       document.querySelectorAll('.entity-card').forEach(c => c.classList.remove('active'));
       el.classList.add('active');
-      fillTester('GET', e.route + '?page=0&size=10', '');
+      fillTester('GET', e.route + '?page=0&size=10', e.postBody || '');
     };
     grid.appendChild(el);
   });
