@@ -423,20 +423,6 @@
       color: var(--text-dim); margin-top: 6px;
     }
 
-    /* ── DEPLOY GUIDE ── */
-    .deploy-section { margin-bottom: 48px; }
-    .step-list { display: flex; flex-direction: column; gap: 12px; }
-    .step {
-      display: flex; gap: 16px; align-items: flex-start;
-      background: var(--surface); border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 6px; padding: 14px 16px;
-    }
-    .step-num {
-      font-family: 'Cinzel Decorative', serif; font-size: 18px; font-weight: 700;
-      color: var(--orange); width: 28px; flex-shrink: 0; line-height: 1;
-    }
-    .step-content { font-size: 13px; line-height: 1.6; color: var(--text-dim); }
-    .step-content strong { color: var(--text); }
     code {
       background: rgba(232,114,26,0.1); border: 1px solid rgba(232,114,26,0.2);
       border-radius: 3px; padding: 1px 6px;
@@ -564,43 +550,6 @@
     <div class="section-title">Rotas Rápidas</div>
     <div class="quick-routes">
       <div class="route-list" id="routes-list"></div>
-    </div>
-
-    <!-- ══ DEPLOY GUIDE ══ -->
-    <div class="section-title">Como Integrar — Render + GitHub Pages</div>
-    <div class="deploy-section">
-      <div class="step-list">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <strong>Deploy no Render:</strong> Acesse <code>render.com</code>, crie um novo <em>Web Service</em>, conecte ao repositório Git com o projeto Spring Boot e configure como: <code>./mvnw package -DskipTests</code> para build e <code>java -jar target/*.jar</code> para start. Use a porta <code>8080</code>.
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <strong>Configure a URL:</strong> Após o deploy, copie a URL gerada pelo Render (ex: <code>https://shadowhunters-api.onrender.com</code>) e cole no campo "URL Base da API" acima. Clique em <strong>Conectar</strong>.
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-content">
-            <strong>GitHub Pages:</strong> Coloque este arquivo <code>index.html</code> na raiz do seu repositório (ou na pasta <code>/docs</code>). No GitHub, vá em <em>Settings → Pages</em> e habilite o Pages apontando para a branch e pasta corretas.
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">4</div>
-          <div class="step-content">
-            <strong>CORS:</strong> Certifique-se que a sua <code>CorsConfig.java</code> permite requisições de <code>https://seu-usuario.github.io</code>. Adicione a origem do seu GitHub Pages na lista de origens permitidas.
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">5</div>
-          <div class="step-content">
-            <strong>Swagger:</strong> Acesse <code>/swagger-ui.html</code> na URL do Render para documentação interativa completa. O link <strong>Swagger UI ↗</strong> no topo desta página abre automaticamente após configurar a URL.
-          </div>
-        </div>
-      </div>
     </div>
 
   </main>
