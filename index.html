@@ -693,11 +693,11 @@
       postBody: '{\n  "nomeCidade": "Nova York",\n  "chefeDoInstituto": "Maryse Lightwood"\n}'
     },
     {
-      name: 'API Key', route: '/apikeys', icon: '🔑',
+      name: 'API Key', route: '/api-keys', icon: '🔑',
       color: 'linear-gradient(135deg,#7a6a1a,#4a3f08)',
-      desc: 'Gerenciamento de chaves de autenticação. Requer X-API-Key válida.',
+      desc: 'Gerar chave (público): POST /api-keys/gerar?nomeUsuario=X&nivelAcesso=USUARIO. Listar e revogar exigem X-API-Key no header.',
       methods: ['GET','POST','DELETE'],
-      postBody: '{\n  "descricao": "Chave de acesso para uso externo"\n}'
+      postBody: ''
     },
   ];
 
@@ -731,20 +731,24 @@
 
   // ── Quick routes ──
   const ROUTES = [
-    { method:'GET',    path:'/personagens?page=0&size=10',             desc:'Listar personagens paginado',        color:'#6ee7b7' },
-    { method:'GET',    path:'/personagens/1',                          desc:'Buscar personagem por ID',           color:'#6ee7b7' },
-    { method:'GET',    path:'/personagens/buscar?nome=Clary',          desc:'Buscar personagem por nome',         color:'#6ee7b7' },
-    { method:'POST',   path:'/personagens',                            desc:'Criar personagem (requer Idempotency-Key)', color:'#f59d45', body:'{\n  "nome": "Jace Herondale",\n  "especie": "SHADOWHUNTER",\n  "estaVivo": true\n}' },
-    { method:'GET',    path:'/armas?page=0&size=10',                   desc:'Listar armas',                       color:'#6ee7b7' },
-    { method:'POST',   path:'/armas',                                  desc:'Criar arma',                         color:'#f59d45', body:'{\n  "nome": "Lâmina Serafim",\n  "tipoMaterial": "Adamas"\n}' },
-    { method:'GET',    path:'/runas?page=0&size=10',                   desc:'Listar runas',                       color:'#6ee7b7' },
-    { method:'POST',   path:'/runas',                                  desc:'Criar runa',                         color:'#f59d45', body:'{\n  "nome": "Iratze",\n  "efeito": "Cura ferimentos físicos",\n  "nivelDeDor": 2\n}' },
-    { method:'GET',    path:'/missoes?page=0&size=10',                 desc:'Listar missões',                     color:'#6ee7b7' },
-    { method:'GET',    path:'/missoes/buscar?periculosidade=ALTA',     desc:'Missões por periculosidade',         color:'#6ee7b7' },
-    { method:'GET',    path:'/institutos?page=0&size=10',              desc:'Listar institutos',                  color:'#6ee7b7' },
-    { method:'GET',    path:'/institutos/buscar?cidade=Nova',          desc:'Buscar instituto por cidade',        color:'#6ee7b7' },
-    { method:'DELETE', path:'/personagens/1',                          desc:'Deletar personagem',                 color:'#f87171' },
-    { method:'PUT',    path:'/personagens/1',                          desc:'Atualizar personagem',               color:'#7eb8e8', body:'{\n  "nome": "Jace Wayland",\n  "especie": "SHADOWHUNTER",\n  "estaVivo": true\n}' },
+    { method:'GET',    path:'/personagens?page=0&size=10',             desc:'Listar personagens paginado'              },
+    { method:'GET',    path:'/personagens/1',                          desc:'Buscar personagem por ID'                 },
+    { method:'GET',    path:'/personagens/buscar?nome=Clary',          desc:'Buscar personagem por nome'               },
+    { method:'POST',   path:'/personagens',                            desc:'Criar personagem (requer Idempotency-Key)', body:'\n  "nome": "Jace Herondale",\n  "especie": "SHADOWHUNTER",\n  "estaVivo": true\n}' },
+    { method:'GET',    path:'/armas?page=0&size=10',                   desc:'Listar armas'                             },
+    { method:'POST',   path:'/armas',                                  desc:'Criar arma',                               body:'{\n  "nome": "Lâmina Serafim",\n  "tipoMaterial": "Adamas"\n}' },
+    { method:'GET',    path:'/runas?page=0&size=10',                   desc:'Listar runas'                             },
+    { method:'POST',   path:'/runas',                                  desc:'Criar runa',                               body:'{\n  "nome": "Iratze",\n  "efeito": "Cura ferimentos físicos",\n  "nivelDeDor": 2\n}' },
+    { method:'GET',    path:'/missoes?page=0&size=10',                 desc:'Listar missões'                           },
+    { method:'GET',    path:'/missoes/buscar?periculosidade=ALTA',     desc:'Missões por periculosidade'               },
+    { method:'GET',    path:'/institutos?page=0&size=10',              desc:'Listar institutos'                        },
+    { method:'GET',    path:'/institutos/buscar?cidade=Nova',          desc:'Buscar instituto por cidade'              },
+    { method:'DELETE', path:'/personagens/1',                          desc:'Deletar personagem'                       },
+    { method:'PUT',    path:'/personagens/1',                          desc:'Atualizar personagem',                     body:'{\n  "nome": "Jace Wayland",\n  "especie": "SHADOWHUNTER",\n  "estaVivo": true\n}' },
+    // ── API Keys ──
+    { method:'POST',   path:'/api-keys/gerar?nomeUsuario=Alec&nivelAcesso=USUARIO', desc:'🔑 Gerar chave (PÚBLICO — sem X-API-Key)' },
+    { method:'GET',    path:'/api-keys?page=0&size=10',               desc:'🔑 Listar chaves (exige X-API-Key)'        },
+    { method:'DELETE', path:'/api-keys/1/revogar',                    desc:'🔑 Revogar chave por ID (exige X-API-Key)' },
   ];
 
   const list = document.getElementById('routes-list');
