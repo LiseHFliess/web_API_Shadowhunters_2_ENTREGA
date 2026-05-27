@@ -647,12 +647,17 @@
     btn.disabled = false; btn.textContent = 'Enviar';
   }
 
-  // ✅ FIX: sempre atualiza o body-input, inclusive quando vazio
   function fillTester(method, path, body) {
+    const newBody = (body !== undefined && body !== null) ? body : '';
     document.getElementById('method-select').value  = method;
     document.getElementById('endpoint-input').value = path;
-    document.getElementById('body-input').value = body !== undefined ? body : '';
-    document.getElementById('tester').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const bodyEl = document.getElementById('body-input');
+    bodyEl.value = newBody;
+    // força re-render antes do scroll
+    requestAnimationFrame(() => {
+      bodyEl.value = newBody;
+      document.getElementById('tester').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }
 
   // ── Entities ──
@@ -692,13 +697,7 @@
       methods: ['GET','POST','PUT','DELETE'],
       postBody: '{\n  "nomeCidade": "Nova York",\n  "chefeDoInstituto": "Maryse Lightwood"\n}'
     },
-    {
-      name: 'API Key', route: '/api-keys', icon: '🔑',
-      color: 'linear-gradient(135deg,#7a6a1a,#4a3f08)',
-      desc: 'Gerar chave (público): POST /api-keys/gerar?nomeUsuario=X&nivelAcesso=USUARIO. Listar e revogar exigem X-API-Key no header.',
-      methods: ['GET','POST','DELETE'],
-      postBody: ''
-    },
+
   ];
 
   const grid = document.getElementById('entities-grid');
@@ -720,11 +719,16 @@
         </div>
       </div>
     `;
-    // ✅ FIX: passa e.postBody para o tester ao clicar no card
     el.onclick = () => {
       document.querySelectorAll('.entity-card').forEach(c => c.classList.remove('active'));
       el.classList.add('active');
-      fillTester('GET', e.route + '?page=0&size=10', e.postBody || '');
+      if (e.postBody) {
+        fillTester('POST', e.route, e.postBody);
+      } else if (e.gerarPath) {
+        fillTester('POST', e.gerarPath, '');
+      } else {
+        fillTester('GET', e.route + '?page=0&size=10', '');
+      }
     };
     grid.appendChild(el);
   });
@@ -745,10 +749,7 @@
     { method:'GET',    path:'/institutos/buscar?cidade=Nova',          desc:'Buscar instituto por cidade'              },
     { method:'DELETE', path:'/personagens/1',                          desc:'Deletar personagem'                       },
     { method:'PUT',    path:'/personagens/1',                          desc:'Atualizar personagem',                     body:'{\n  "nome": "Jace Wayland",\n  "especie": "SHADOWHUNTER",\n  "estaVivo": true\n}' },
-    // ── API Keys ──
-    { method:'POST',   path:'/api-keys/gerar?nomeUsuario=Alec&nivelAcesso=USUARIO', desc:'🔑 Gerar chave (PÚBLICO — sem X-API-Key)' },
-    { method:'GET',    path:'/api-keys?page=0&size=10',               desc:'🔑 Listar chaves (exige X-API-Key)'        },
-    { method:'DELETE', path:'/api-keys/1/revogar',                    desc:'🔑 Revogar chave por ID (exige X-API-Key)' },
+
   ];
 
   const list = document.getElementById('routes-list');
